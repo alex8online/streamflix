@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamFlix v6.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#0e0e0e] text-white font-[Outfit] antialiased">
+
+<!-- 🔝 NAVBAR -->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur px-6 py-4 flex items-center justify-between shadow transition-all duration-300">
+  <div class="flex items-center gap-6">
+    <span class="text-2xl font-extrabold text-red-600 tracking-wide">StreamFlix</span>
+    <nav class="hidden md:flex gap-5 text-gray-300">
+      <button onclick="navigateTo('home')" class="hover:text-white transition">Home</button>
+      <button onclick="navigateTo('top10')" class="hover:text-white transition">Top 10</button>
+      <button onclick="navigateTo('genres')" class="hover:text-white transition">Categorie</button>
+    </nav>
+  </div>
+  <div class="flex gap-2">
+    <input id="searchInput" type="text" placeholder="Cerca film o serie..."
+      class="bg-zinc-800 text-sm text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 w-40 md:w-64 transition-all duration-300" />
+    <button onclick="triggerSearch()" class="text-white p-2 bg-red-600 hover:bg-red-700 rounded">
+      <i class="lucide lucide-search"></i>
+    </button>
+  </div>
+</header>
+
+<!-- 🖼️ HERO -->
+<section id="hero" class="pt-28 md:pt-32 px-6 md:px-12 h-[85vh] w-full relative bg-cover bg-center transition-all duration-500">
+  <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10"></div>
+  <div class="relative z-20 h-full flex flex-col justify-end pb-16 max-w-4xl">
+    <h1 id="heroTitle" class="text-4xl md:text-5xl font-extrabold mb-4 fade-in">Titolo</h1>
+    <div class="flex items-center gap-4 mb-3 fade-in">
+      <span id="heroMatch" class="bg-green-700 text-xs font-bold px-2 py-1 rounded">97% Match</span>
+      <span id="heroYear" class="text-sm text-gray-400">2024</span>
+      <span id="heroRating" class="bg-yellow-500/20 text-yellow-300 text-xs font-bold px-2 py-1 rounded">★ 8.7</span>
+    </div>
+    <p id="heroOverview" class="text-sm md:text-base text-gray-200 max-w-xl mb-6 fade-in">Trama breve...</p>
+    <div class="flex gap-4 fade-in">
+      <button id="heroPlay" class="bg-white text-black px-5 py-2 rounded font-bold text-sm flex items-center gap-2 hover:bg-gray-300">
+        <i class="lucide lucide-play"></i> Riproduci
+      </button>
+      <button class="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded font-bold text-sm">Più info</button>
+    </div>
+  </div>
+</section>
+
+<!-- 🔟 TOP 10 -->
+<section id="top10" class="px-6 md:px-12 mt-12 mb-16">
+  <h2 class="text-2xl font-bold mb-4 fade-in">🔝 Top 10 in Italia</h2>
+  <div id="top10-container" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 fade-in"></div>
+</section>
+
+<!-- 🧩 CATEGORIE -->
+<section id="genres" class="px-6 md:px-12 mb-20">
+  <h2 class="text-2xl font-bold mb-8 fade-in">🎞️ Esplora per categoria</h2>
+  <div id="categories-wrapper" class="space-y-12 fade-in"></div>
+</section>
+
+<!-- 🔍 RICERCA -->
+<section id="searchView" class="hidden px-6 md:px-12 mb-16">
+  <h2 id="searchTitle" class="text-2xl font-bold mb-4">🔍 Risultati ricerca</h2>
+  <div id="search-results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+</section>
+
+<!-- 🎬 DETTAGLIO FILM/SERIE -->
+<section id="detailView" class="hidden w-full px-6 md:px-12 py-12 bg-zinc-950 min-h-screen">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+    <img id="detailPoster" src="" class="w-full rounded shadow-xl object-cover max-h-[500px]" />
+    <div class="md:col-span-2">
+      <h1 id="detailTitle" class="text-4xl font-bold mb-4">Titolo Dettagliato</h1>
+      <p id="detailOverview" class="text-gray-300 text-sm mb-4">Descrizione completa...</p>
+      <div id="detailMeta" class="text-sm text-gray-400 mb-4">Genere, Anno, Durata</div>
+      <div id="detailCast" class="text-sm text-gray-300 mb-4">👥 Cast: ...</div>
+      <div id="episodeSection" class="hidden">
+        <label class="block mb-2 font-semibold text-white">Seleziona stagione</label>
+        <select id="seasonSelect" class="mb-4 bg-gray-800 text-white p-2 rounded w-full"></select>
+        <div id="episodeList" class="space-y-2"></div>
+      </div>
+      <div class="flex gap-4 mt-4">
+        <button id="watchNowBtn" class="bg-red-600 hover:bg-red-700 px-5 py-2 text-white rounded font-bold text-sm">
+          ▶ Guarda ora
+        </button>
+        <button id="trailerBtn" class="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded font-bold text-sm">
+          🎞 Trailer
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🎥 PLAYER MODALE -->
+<div id="modal" class="fixed inset-0 z-[999] bg-black/90 hidden flex items-center justify-center">
+  <div class="bg-zinc-900 p-5 rounded-lg max-w-3xl w-[90%] max-h-[90vh] overflow-y-auto relative">
+    <button onclick="closeModal()" class="absolute top-3 right-3 text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-full">
+      ✕
+    </button>
+    <div id="modalContent" class="w-full"></div>
+  </div>
+</div>
+<style>
+  :root {
+    --red: #e50914;
+    --dark: #0e0e0e;
+    --gray: #222;
+  }
+
+  body {
+    scroll-behavior: smooth;
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card {
+    aspect-ratio: 16 / 9;
+    min-width: 240px;
+    background-color: var(--gray);
+    overflow: hidden;
+    border-radius: 0.5rem;
+    transition: transform 0.25s ease;
+    cursor: pointer;
+  }
+
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+
+  .card:hover img {
+    transform: scale(1.05);
+  }
+
+  .navbar-small {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    background-color: #000000dd !important;
+  }
+
+  .top-number {
+    position: absolute;
+    left: -10px;
+    top: -10px;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #111111;
+    opacity: 0.5;
+  }
+
+  .backdrop {
+    background-size: cover;
+    background-position: center;
+  }
+
+  #search-results img:hover,
+  #top10-container img:hover {
+    outline: 2px solid var(--red);
+    outline-offset: 1px;
+  }
+
+  #modal iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+  }
+
+  /* Scrollbar per caroselli */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+<script>
+const API_KEY = '2e0b38cfb2936cec8ab1ce48e4335ac3';
+const BASE = 'https://api.themoviedb.org/3';
+const IMG = 'https://image.tmdb.org/t/p/w500';
+const VIX = 'https://vixsrc.to';
+const VIX_PARAMS = 'autoplay=true&lang=it&primaryColor=E50914';
+
+const GENRES = {
+  movie: {
+    Azione: 28,
+    Commedia: 35,
+    Horror: 27,
+    Romantici: 10749
+  },
+  tv: {
+    Crime: 80,
+    Fantasy: 10765,
+    Dramma: 18
+  }
+};
+
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('search-results');
+const navbar = document.getElementById('navbar');
+
+const fadeObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+// 🧭 SPA Router
+function navigateTo(viewId) {
+  const sections = ['top10', 'genres', 'searchView', 'detailView'];
+  sections.forEach(id => document.getElementById(id).classList.add('hidden'));
+  if (viewId !== 'home') document.getElementById(viewId).classList.remove('hidden');
+  if (viewId === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 🔝 Scroll shrink navbar
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 30) {
+    navbar.classList.add('navbar-small');
+  } else {
+    navbar.classList.remove('navbar-small');
+  }
+});
+
+// 🔍 Ricerca
+searchInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') triggerSearch();
+});
+
+async function triggerSearch() {
+  const q = searchInput.value.trim();
+  if (!q) return;
+  const res = await fetch(`${BASE}/search/multi?api_key=${API_KEY}&language=it-IT&query=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  const results = data.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
+  searchResults.innerHTML = results.map(i => renderCard(i, i.media_type)).join('');
+  document.getElementById('searchTitle').textContent = `Risultati per: "${q}"`;
+  navigateTo('searchView');
+}
+
+// 🔳 Card
+function renderCard(item, type, rank = null) {
+  const title = item.title || item.name;
+  const img = item.poster_path ? IMG + item.poster_path : 'https://placehold.co/300x450';
+  return `
+    <div onclick="openDetail(${item.id}, '${type}')" class="relative card group">
+      ${rank ? `<div class="top-number">${rank}</div>` : ''}
+      <img src="${img}" alt="${title}" />
+    </div>
+  `;
+}
+
+// 🖼️ Hero dinamico
+async function loadHero() {
+  const trending = await fetchList('trending/all/week');
+  const item = trending[0];
+  const bg = item.backdrop_path ? IMG + item.backdrop_path : '';
+  document.getElementById('hero').style.backgroundImage = `url(${bg})`;
+  document.getElementById('heroTitle').textContent = item.title || item.name;
+  document.getElementById('heroOverview').textContent = item.overview || 'Nessuna descrizione disponibile.';
+  document.getElementById('heroYear').textContent = (item.release_date || item.first_air_date || '').split('-')[0];
+  document.getElementById('heroMatch').textContent = `${Math.floor(Math.random() * 21) + 80}% Match`;
+  document.getElementById('heroRating').textContent = `★ ${item.vote_average?.toFixed(1) || 'N/A'}`;
+  document.getElementById('heroPlay').onclick = () => playVix(item.media_type, item.id);
+}
+
+// 🔟 Top 10
+async function loadTop10() {
+  const top = await fetchList('trending/all/week');
+  const container = document.getElementById('top10-container');
+  container.innerHTML = top.slice(0, 10).map((m, i) => renderCard(m, m.media_type, i + 1)).join('');
+}
+
+// 🧩 Categorie dinamiche
+async function loadCategories() {
+  const wrap = document.getElementById('categories-wrapper');
+  let html = '';
+  for (const [type, genres] of Object.entries(GENRES)) {
+    for (const [label, id] of Object.entries(genres)) {
+      const items = await fetchCategory(type, id);
+      html += `
+        <div class="fade-in">
+          <h3 class="text-xl font-semibold mb-2">${label} (${type})</h3>
+          <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
+            ${items.slice(0, 10).map(m => renderCard(m, type)).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+}
+
+// 📡 API
+async function fetchList(endpoint) {
+  const res = await fetch(`${BASE}/${endpoint}?api_key=${API_KEY}&language=it-IT`);
+  const data = await res.json();
+  return data.results || [];
+}
+
+async function fetchCategory(type, genreId) {
+  const res = await fetch(`${BASE}/discover/${type}?api_key=${API_KEY}&language=it-IT&with_genres=${genreId}`);
+  const data = await res.json();
+  return data.results || [];
+}
+
+// 🚀 INIT
+loadHero();
+loadTop10();
+loadCategories();
+</script>
+<script>
+async function fetchDetails(id, type = 'movie') {
+  const res = await fetch(`${BASE}/${type}/${id}?api_key=${API_KEY}&language=it-IT&append_to_response=credits,videos,seasons`);
+  return await res.json();
+}
+
+async function openDetail(id, type) {
+  const view = document.getElementById('detailView');
+  navigateTo('detailView');
+  const data = await fetchDetails(id, type);
+
+  document.getElementById('detailTitle').textContent = data.title || data.name;
+  document.getElementById('detailOverview').textContent = data.overview || 'Nessuna descrizione disponibile.';
+  document.getElementById('detailPoster').src = data.poster_path ? IMG + data.poster_path : 'https://placehold.co/300x450';
+  document.getElementById('detailMeta').textContent = `${(data.release_date || data.first_air_date || '').split('-')[0]} • ${data.genres.map(g => g.name).join(', ')} • ${data.runtime || data.episode_run_time?.[0] || 'N/A'} min`;
+
+  const cast = data.credits?.cast?.slice(0, 6).map(c => c.name).join(', ') || 'N/D';
+  document.getElementById('detailCast').innerHTML = `👥 <strong>Cast:</strong> ${cast}`;
+
+  const watchBtn = document.getElementById('watchNowBtn');
+  const trailerBtn = document.getElementById('trailerBtn');
+
+  watchBtn.onclick = () => {
+    if (type === 'movie') playVix('movie', id);
+    else {
+      const s = data.seasons.find(s => s.season_number > 0);
+      playVix('tv', id, s?.season_number || 1, 1);
+    }
+  };
+
+  const trailer = data.videos?.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+  trailerBtn.onclick = () => {
+    if (trailer) {
+      openModal(`<iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" allowfullscreen allow="autoplay" class="w-full aspect-video rounded"></iframe>`);
+    } else {
+      alert('Trailer non disponibile 😢');
+    }
+  };
+
+  // Serie: mostra stagioni + episodi
+  const episodeSection = document.getElementById('episodeSection');
+  if (type === 'tv') {
+    const select = document.getElementById('seasonSelect');
+    const list = document.getElementById('episodeList');
+    episodeSection.classList.remove('hidden');
+    select.innerHTML = data.seasons.filter(s => s.season_number > 0).map(s =>
+      `<option value="${s.season_number}">${s.name}</option>`
+    ).join('');
+    select.onchange = () => loadEpisodes(id, select.value, list);
+    loadEpisodes(id, select.value, list);
+  } else {
+    episodeSection.classList.add('hidden');
+  }
+}
+
+async function loadEpisodes(tvId, seasonNumber, container) {
+  const res = await fetch(`${BASE}/tv/${tvId}/season/${seasonNumber}?api_key=${API_KEY}&language=it-IT`);
+  const data = await res.json();
+  container.innerHTML = data.episodes.map(e => `
+    <div class="bg-zinc-800 px-4 py-2 rounded flex justify-between items-center">
+      <span>${e.episode_number}. ${e.name}</span>
+      <button onclick="playVix('tv', ${tvId}, ${seasonNumber}, ${e.episode_number})" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs rounded">▶</button>
+    </div>
+  `).join('');
+}
+
+function playVix(type, id, season = 1, episode = 1) {
+  const url = type === 'movie'
+    ? `${VIX}/movie/${id}?${VIX_PARAMS}`
+    : `${VIX}/tv/${id}/${season}/${episode}?${VIX_PARAMS}`;
+  openModal(`<iframe src="${url}" allowfullscreen allow="autoplay" class="w-full aspect-video rounded"></iframe>`);
+}
+
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('modalContent').innerHTML = '';
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>

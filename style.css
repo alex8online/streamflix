@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamFlix v6.0</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#0e0e0e] text-white font-[Outfit] antialiased">
+
+  <!-- NAVBAR -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur px-6 py-4 flex items-center justify-between shadow transition-all duration-300">
+    <div class="flex items-center gap-6">
+      <span class="text-2xl font-extrabold text-red-600 tracking-wide">StreamFlix</span>
+      <nav class="hidden md:flex gap-5 text-gray-300">
+        <button onclick="navigateTo('home')" class="hover:text-white transition">Home</button>
+        <button onclick="navigateTo('top10')" class="hover:text-white transition">Top 10</button>
+        <button onclick="navigateTo('genres')" class="hover:text-white transition">Categorie</button>
+      </nav>
+    </div>
+    <div class="flex gap-2">
+      <input id="searchInput" type="text" placeholder="Cerca film o serie..."
+        class="bg-zinc-800 text-sm text-white rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 w-40 md:w-64 transition-all duration-300" />
+      <button onclick="triggerSearch()" class="text-white p-2 bg-red-600 hover:bg-red-700 rounded">
+        <i class="lucide lucide-search"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="hero" class="pt-28 md:pt-32 px-6 md:px-12 h-[85vh] w-full relative bg-cover bg-center transition-all duration-500">
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10"></div>
+    <div class="relative z-20 h-full flex flex-col justify-end pb-16 max-w-4xl">
+      <h1 id="heroTitle" class="text-4xl md:text-5xl font-extrabold mb-4 fade-in">Titolo</h1>
+      <div class="flex items-center gap-4 mb-3 fade-in">
+        <span id="heroMatch" class="bg-green-700 text-xs font-bold px-2 py-1 rounded">97% Match</span>
+        <span id="heroYear" class="text-sm text-gray-400">2024</span>
+        <span id="heroRating" class="bg-yellow-500/20 text-yellow-300 text-xs font-bold px-2 py-1 rounded">★ 8.7</span>
+      </div>
+      <p id="heroOverview" class="text-sm md:text-base text-gray-200 max-w-xl mb-6 fade-in">Trama breve...</p>
+      <div class="flex gap-4 fade-in">
+        <button id="heroPlay" class="bg-white text-black px-5 py-2 rounded font-bold text-sm flex items-center gap-2 hover:bg-gray-300">
+          <i class="lucide lucide-play"></i> Riproduci
+        </button>
+        <button class="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded font-bold text-sm">Più info</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOP 10 -->
+  <section id="top10" class="px-6 md:px-12 mt-12 mb-16">
+    <h2 class="text-2xl font-bold mb-4 fade-in">🔝 Top 10 in Italia</h2>
+    <div id="top10-container" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 fade-in"></div>
+  </section>
+
+  <!-- CATEGORIE -->
+  <section id="genres" class="px-6 md:px-12 mb-20">
+    <h2 class="text-2xl font-bold mb-8 fade-in">🎞️ Esplora per categoria</h2>
+    <div id="categories-wrapper" class="space-y-12 fade-in"></div>
+  </section>
+
+  <!-- RISULTATI RICERCA -->
+  <section id="searchView" class="hidden px-6 md:px-12 mb-16">
+    <h2 id="searchTitle" class="text-2xl font-bold mb-4">🔍 Risultati ricerca</h2>
+    <div id="search-results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+  </section>
+
+  <!-- DETTAGLIO -->
+  <section id="detailView" class="hidden w-full px-6 md:px-12 py-12 bg-zinc-950 min-h-screen">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+      <img id="detailPoster" src="" class="w-full rounded shadow-xl object-cover max-h-[500px]" />
+      <div class="md:col-span-2">
+        <h1 id="detailTitle" class="text-4xl font-bold mb-4">Titolo Dettagliato</h1>
+        <p id="detailOverview" class="text-gray-300 text-sm mb-4">Descrizione completa...</p>
+        <div id="detailMeta" class="text-sm text-gray-400 mb-4">Genere, Anno, Durata</div>
+        <div id="detailCast" class="text-sm text-gray-300 mb-4">👥 Cast: ...</div>
+        <div id="episodeSection" class="hidden">
+          <label class="block mb-2 font-semibold text-white">Seleziona stagione</label>
+          <select id="seasonSelect" class="mb-4 bg-gray-800 text-white p-2 rounded w-full"></select>
+          <div id="episodeList" class="space-y-2"></div>
+        </div>
+        <div class="flex gap-4 mt-4">
+          <button id="watchNowBtn" class="bg-red-600 hover:bg-red-700 px-5 py-2 text-white rounded font-bold text-sm">▶ Guarda ora</button>
+          <button id="trailerBtn" class="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded font-bold text-sm">🎞 Trailer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODALE PLAYER -->
+  <div id="modal" class="fixed inset-0 z-[999] bg-black/90 hidden flex items-center justify-center">
+    <div class="bg-zinc-900 p-5 rounded-lg max-w-3xl w-[90%] max-h-[90vh] overflow-y-auto relative">
+      <button onclick="closeModal()" class="absolute top-3 right-3 text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-full">✕</button>
+      <div id="modalContent" class="w-full"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT JS -->
+  <script src="app.js"></script>
+</body>
+</html>
